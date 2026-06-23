@@ -1,4 +1,5 @@
 import express, { type Request, type Response } from "express";
+import { authRoute } from "./modules/auth/auth.route";
 
 const app = express();
 const port = 5000;
@@ -15,5 +16,6 @@ app.get("/", (req: Request, res: Response) => {
     message: "Welcome to the Dev-Pulse!!!",
   });
 });
+app.use('/api/auth',authRoute)
 
 export default app;
