@@ -1,5 +1,6 @@
 import express, { type Request, type Response } from "express";
 import { authRoute } from "./modules/auth/auth.route";
+import { issueRoute } from "./modules/issue/issue.route";
 
 const app = express();
 const port = 5000;
@@ -17,5 +18,6 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 app.use('/api/auth',authRoute)
+app.use('/api/issues',issueRoute)
 
 export default app;
