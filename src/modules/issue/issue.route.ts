@@ -5,5 +5,6 @@ import { issuesController } from "./issue.controller";
 const router = Router();
 
 router.post("/", auth(), issuesController.createIssues);
+router.get('/',issuesController.getAllIssues);
 
 export const issueRoute = router;
