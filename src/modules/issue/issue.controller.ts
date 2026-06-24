@@ -49,8 +49,27 @@ const getAllIssues = async (req: Request, res: Response) => {
     });
   }
 };
-
+const getSingleIssues = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const result = await issuesService.getSingleIssueFromDb(id);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue retrived successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: 500,
+      success: false,
+      message: error.message || "Internal Server Error!!!",
+      error: error,
+    });
+  }
+};
 export const issuesController = {
   createIssues,
   getAllIssues,
+  getSingleIssues,
 };

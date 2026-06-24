@@ -1,6 +1,7 @@
 import { pool } from "../../db";
 import type { GetIssuesQuery, IssuesPayload } from "./issue.interface";
 
+// ===========create issues===========
 const createIssuesIntoDb = async (
   payload: IssuesPayload,
   reporter_id: number,
@@ -27,6 +28,7 @@ const createIssuesIntoDb = async (
   return result;
 };
 
+// =========get all issues with query==========
 const getAllIssuesFromDb = async (queryParameter: GetIssuesQuery) => {
   const { sort = "newest", type, status } = queryParameter;
 
@@ -93,7 +95,38 @@ const getAllIssuesFromDb = async (queryParameter: GetIssuesQuery) => {
   return allIssuesWithReporter;
 };
 
+// =========get single issues by id=========
+const getSingleIssueFromDb = async (id: number) => {
+  const result = await pool.query(
+    `
+    SELECT * FROM issues WHERE id=$1
+    `,
+    [id],
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error("This issue is not found!!");
+  }
+  const { reporter_id, created_at, updated_at, ...issueData } = result.rows[0];
+
+  const findReporter = await pool.query(
+    `
+    SELECT id, name, role FROM users WHERE id=$1
+    `,
+    [reporter_id],
+  );
+
+  const reporter = findReporter.rows[0];
+
+  return {
+    ...issueData,
+    reporter,
+    created_at,
+    updated_at,
+  };
+};
 export const issuesService = {
   createIssuesIntoDb,
   getAllIssuesFromDb,
+  getSingleIssueFromDb,
 };
