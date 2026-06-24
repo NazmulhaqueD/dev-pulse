@@ -49,6 +49,8 @@ const getAllIssues = async (req: Request, res: Response) => {
     });
   }
 };
+
+// ======get all users=======
 const getSingleIssues = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -68,8 +70,52 @@ const getSingleIssues = async (req: Request, res: Response) => {
     });
   }
 };
+
+const updateIssue = async (req: Request, res: Response) => {
+  try {
+    const issueId = Number(req.params.id);
+    const user = req.user;
+    const result = await issuesService.updateIssueInDb(user, issueId, req.body);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue updated successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: 500,
+      success: false,
+      message: error.message || "Internal Server Error!!!",
+      error: error,
+    });
+  }
+};
+
+// =======delete issue========
+const deleteIssue = async (req: Request, res: Response) => {
+  try {
+    const issueId = Number(req.params.id);
+    const user = req.user;
+    const result = await issuesService.deleteIssueFromDb(user, issueId);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue deleted successfully",
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: 500,
+      success: false,
+      message: error.message || "Internal Server Error!!!",
+      error: error,
+    });
+  }
+};
 export const issuesController = {
   createIssues,
   getAllIssues,
   getSingleIssues,
+  updateIssue,
+  deleteIssue,
 };

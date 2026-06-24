@@ -1,3 +1,4 @@
+import type { JwtPayload } from "jsonwebtoken";
 import { pool } from "../../db";
 import type { GetIssuesQuery, IssuesPayload } from "./issue.interface";
 
@@ -125,8 +126,69 @@ const getSingleIssueFromDb = async (id: number) => {
     updated_at,
   };
 };
+
+const updateIssueInDb = async (
+  user: JwtPayload,
+  issueId: number,
+  payload: any,
+) => {
+  const { title, description, type } = payload;
+  const issueResult = await pool.query(
+    `
+    SELECT * FROM issues WHERE id=$1
+    `,
+    [issueId],
+  );
+
+  if (issueResult.rows.length === 0) {
+    throw new Error("Issue not founded");
+  }
+
+  const issue = issueResult.rows[0];
+
+  // check role and set permission validation
+  if (user.role === "contributor") {
+    if (user.id !== issue.reporter_id) {
+      throw new Error("You are not authorized to update this issue");
+    }
+
+    if (issue.status !== "open") {
+      throw new Error("Only open issues can be updated");
+    }
+  }
+
+  if (title && title.length > 150) {
+    throw new Error("Title must not exceed 150 characters");
+  }
+
+  if (description && description.length < 20) {
+    throw new Error("Description must be at least 20 characters long");
+  }
+
+  const result = await pool.query(
+    `
+    UPDATE issues 
+    SET
+    title = COALESCE($1, title),
+    description = COALESCE($2, description),
+    type = COALESCE($3, type),
+    updated_at = CURRENT_TIMESTAMP
+    WHERE id = $4
+
+    RETURNING *
+    `,
+    [title, description, type, issueId],
+  );
+  return result;
+};
+
+const deleteIssueFromDb = async (user: JwtPayload, issueId: number) => {
+  console.log(user, issueId);
+};
 export const issuesService = {
   createIssuesIntoDb,
   getAllIssuesFromDb,
   getSingleIssueFromDb,
+  updateIssueInDb,
+  deleteIssueFromDb
 };
