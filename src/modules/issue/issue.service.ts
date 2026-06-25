@@ -183,12 +183,28 @@ const updateIssueInDb = async (
 };
 
 const deleteIssueFromDb = async (user: JwtPayload, issueId: number) => {
-  console.log(user, issueId);
+  if (user.role !== "maintainer") {
+    const error: any = new Error("Only maintainers can perform this action");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const result = await pool.query(
+    `
+    DELETE FROM issues WHERE id=$1 RETURNING *
+    `,
+    [issueId],
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error("Something went wrong!!");
+  }
+  return result;
 };
 export const issuesService = {
   createIssuesIntoDb,
   getAllIssuesFromDb,
   getSingleIssueFromDb,
   updateIssueInDb,
-  deleteIssueFromDb
+  deleteIssueFromDb,
 };

@@ -30,7 +30,6 @@ const createIssues = async (req: Request, res: Response) => {
 const getAllIssues = async (req: Request, res: Response) => {
   try {
     const { sort = "newest", type, status } = req.query;
-    console.log(sort, type, status);
 
     const result = await issuesService.getAllIssuesFromDb(req.query);
 
@@ -105,7 +104,7 @@ const deleteIssue = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     sendResponse(res, {
-      statusCode: 500,
+      statusCode: error.statusCode || 500,
       success: false,
       message: error.message || "Internal Server Error!!!",
       error: error,
